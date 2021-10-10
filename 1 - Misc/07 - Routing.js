@@ -3,7 +3,7 @@ const http = require('http');
 const url = require('url');
 
 /////////////////////////////////////////////////////////////////////
-// SERVER & BASIC ROUTING//
+// SIMPLE SERVER & BASIC ROUTING//
 
 const server = http.createServer((req, res) => {
   const pathName = req.url;
