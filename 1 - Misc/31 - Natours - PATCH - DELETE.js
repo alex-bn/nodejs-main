@@ -66,63 +66,92 @@ app.post('/api/v1/tours', (req, res) => {
   );
 });
 
-// PATCH request dummy
+// PATCH
 app.patch('/api/v1/tours/:id', (req, res) => {
-  if (req.params.id * 1 > tours.length) {
+  // Dummy patch request
+  // if (req.params.id * 1 > tours.length) {
+  //   return res.status(404).json({
+  //     status: 'Fail',
+  //     message: 'Invalid Id',
+  //   });
+  // }
+
+  // res.status(200).json({
+  //   status: 'Success',
+  //   data: {
+  //     tour: '<Updated tour here>',
+  //   },
+  // });
+
+  const id = +req.params.id;
+  const tour = tours.find(el => el.id === id);
+
+  // if id is not found
+  if (!tour) {
     return res.status(404).json({
-      status: 'Fail',
-      message: 'Invalid ID',
+      status: 'Failed',
+      message: 'Invalid Id',
     });
   }
+
+  // if id is found
+  const updatedTour = { ...tour, ...req.body };
+  const updatedTours = tours.map(tour => {
+    return tour.id === updatedTour.id ? updatedTour : tour;
+  });
+
+  fs.writeFile(dataFile, JSON.stringify(updatedTours), err => {
+    if (err) {
+      return res.status(501).json({
+        status: 'Failed',
+        message: 'Something went wrong ...',
+      });
+    }
+  });
 
   res.status(200).json({
     status: 'Success',
     data: {
-      tour: '<Updated tour placeholder>',
+      data: {
+        tour: updatedTour,
+      },
     },
   });
 });
 
-// DELETE request dummy
+// DELETE
 app.delete('/api/v1/tours/:id', (req, res) => {
-  if (req.params.id * 1 > tours.length) {
+  // // Dummy delete request
+  // if (req.params.id * 1 > tours.length) {
+  //   return res.status(404).json({
+  //     status: 'Fail',
+  //     message: 'Invalid Id',
+  //   });
+  // }
+
+  // res.status(204).json({
+  //   status: 'Success',
+  //   data: null,
+  // });
+
+  const id = parseInt(req.params.id);
+  const tour = tours.find(t => t.id === id);
+
+  if (!tour) {
     return res.status(404).json({
       status: 'Fail',
-      message: 'Invalid ID',
+      message: 'Invalid Id',
     });
   }
 
-  res.status(204).json({
-    status: 'Success',
-    data: null,
+  const updatedTours = tours.filter(t => t.id !== tour.id);
+  fs.writeFile(dataFile, JSON.stringify(updatedTours), err => {
+    res.status(204).json({
+      status: 'Success',
+      data: null,
+    });
   });
 });
-
-// // PATCH request try: it updates the tour but saves the single updated tour instead of the tours array
-// app.patch('/api/v1/tours/:id', (req, res) => {
-//   const id = req.params.id * 1;
-//   const tour = tours.find(el => el.id === id);
-
-//   if (!tour) {
-//     return res.status(404).json({
-//       status: 'Fail',
-//       message: 'Invalid ID',
-//     });
-//   }
-
-//   const newTour = Object.assign(tour, req.body);
-
-//   fs.writeFile(
-//     `${__dirname}/dev-data/data/tours-simple.json`,
-//     JSON.stringify(newTour),
-//     () => {
-//       res.status(200).json({
-//         status: 'success',
-//         data: newTour,
-//       });
-//     }
-//   );
-// });
 
 const port = 3000;
 app.listen(port, () => {
