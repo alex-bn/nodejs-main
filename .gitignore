@@ -1,8 +1,8 @@
 2 - Intro do Node.js and NPM/node_modules
 4 - Asynchronous JS/node_modules
-5 - Express API/node_modules
-5 - Express API/public
-5 - Express API/dev-data/img
-5 - Express API/dev-data/templates
-5 - Express API/config.env
-.gitignore
+5 - Mongoose & Express/node_modules
+5 - Mongoose & Express/config.env
+6 - Natours - api - mcv/dev-data 
+6 - Natours - api - mcv/public
+6 - Natours - api - mcv/node_modules
+6 - Natours - api - mcv/config.env
