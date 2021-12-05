@@ -4,3 +4,5 @@
 5 - Express API/public
 5 - Express API/dev-data/img
 5 - Express API/dev-data/templates
+5 - Express API/config.env
+.gitignore

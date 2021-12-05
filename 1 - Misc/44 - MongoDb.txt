@@ -1,0 +1,61 @@
+> db                -- will show the current selected db
+> show dbs          -- will show a list of all the dbs
+> use natours-test  -- will switch to the natours-test db (if it doesn't exist mongo will automatically create the db and switch to it)
+> show collections  -- will show the collections from the current db
+> find().pretty()   -- will format the data
+
+
+CRUD
+
+1) CREATING DOCUMENTS:
+
+insertMany([{  }, {  }, ..]) -- will accept an array of multiple objects/documents
+
+> db.tours.insertMany([{ name: "The Sea Explorer", price: 497, rating: 4.8 }, { name: "The Snow Adventurer", price: 997, rating: 4.9, difficulty: "easy-peasy" }])
+
+
+insertOne({  }) -- will accept one object/document
+
+> db.tours.insertOne({ name: "The Meat Grinder", price: 200, rating: 3.9, difficulty: "hard" })
+
+
+
+2) QUERYING (READING) DOCUMENTS:
+
+find() -- read all documents in a certain collection without passing anything searching criteria
+
+> db.tours.find()
+
+> db.tours.find({name: "The Forest Hiker"}) -- returns all objects that satisfy the search criteria
+> db.tours.find({price: {$lte: 500} }) -- return all objects that have the price less than 500
+
+&& 
+> db.tours.find({price: {$lt: 500}, rating: {$gte: 4.8} })
+
+|| 
+> db.tours.find({ $or: [ {price: {$lt: 500}}, {rating: {$gte: 4.8}} ] })
+
+select certain fields in the output:
+> db.tours.find({ $or: [ {price: {$gt: 500}}, {rating: {$gte: 4.8}} ] }, {name: 1})
+
+
+
+3) UPDATING DOCUMENTS:
+
+updateOne() -- first argument is a filter object and second is the object that will be updated (property & new value)
+
+> db.tours.updateOne({ name: "The Snow Adventurer" }, { $set: {price: 597} })
+
+updateMany() -- will update all entries that match the search query
+
+> db.tours.updateMany({ price: {$gte: 500}, rating: {$gte: 4.8} }, {$set: {premium: true}})
+
+
+
+4) DELETE DOCUMENTS:
+
+db.tours.deleteMany({  }) -- takes a condition
+
+> db.tours.deleteMany({}) -- will delete all objects/documents !!!!!
+
+> db.tours.deleteMany({rating: {$lt: 4.8}})
