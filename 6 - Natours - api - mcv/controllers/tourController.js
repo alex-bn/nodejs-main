@@ -1,42 +1,26 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 const Tour = require('../models/tourModel');
+const APIFeatures = require('../utils/apiFeatures');
+
+// middleware for aliased route
+exports.aliasTopTours = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
 
 // request handler functions
 exports.getAllTours = async (req, res) => {
   try {
-    console.log(req.query);
-
-    // BUILD THE QUERY
-    // eslint-disable-next-line node/no-unsupported-features/es-syntax
-    const queryObj = { ...req.query };
-    // Filtering
-    const excludedFields = ['page', 'sort', 'limit', 'fields'];
-    excludedFields.forEach((el) => delete queryObj[el]);
-
-    // Advanced filtering
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    let query = Tour.find(JSON.parse(queryStr));
-
-    // Sorting
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
-      query = query.sort(sortBy);
-    } else {
-      // default sorting
-      query = query.sort('-createdAt');
-    }
-
-    // FIELD LIMITING
-    if (req.query.fields) {
-      const fields = req.query.fields.split(',').join(' ');
-      query = query.select(fields);
-    } else {
-      // default search (without the __v field)
-      query = query.select('-__v');
-    }
-
     // EXECUTE QUERY
-    const tours = await query;
+    // the chaining below is possible thanks to ,the 'this' keyword, the object itself that makes it possible to chain one method after another
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const tours = await features.query;
 
     // SEND RESPONSE
     res.status(200).json({
@@ -58,7 +42,6 @@ exports.getAllTours = async (req, res) => {
 exports.getTour = async (req, res) => {
   try {
     const tour = await Tour.findById(req.params.id);
-    // const tour = await Tour.findOne({ _id: req.params.id });
     res.status(200).json({
       status: 'Success',
       data: {
@@ -93,7 +76,7 @@ exports.createTour = async (req, res) => {
 exports.updateTour = async (req, res) => {
   try {
     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-      new: true, // returns the modified document rather than the original
+      new: true,
       runValidators: true,
     });
     res.status(200).json({
