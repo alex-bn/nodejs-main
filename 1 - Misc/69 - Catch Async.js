@@ -1,3 +1,9 @@
+// catchAsync.js:
+module.exports = fn => (req, res, next) => {
+  fn(req, res, next).catch(next);
+};
+
+// tourController.js:
 /* eslint-disable node/no-unsupported-features/es-syntax */
 const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
