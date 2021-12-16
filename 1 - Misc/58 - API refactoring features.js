@@ -1,6 +1,5 @@
 /* eslint-disable node/no-unsupported-features/es-syntax */
 const Tour = require('../models/tourModel');
-const APIFeatures = require('../utils/apiFeatures');
 
 // middleware for aliased route
 exports.aliasTopTours = (req, res, next) => {
@@ -9,6 +8,65 @@ exports.aliasTopTours = (req, res, next) => {
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   next();
 };
+
+class APIFeatures {
+  constructor(query, queryString) {
+    this.query = query;
+    this.queryString = queryString;
+  }
+
+  filter() {
+    // ?duration=5&difficulty=easy
+    // ?duration[gte]=5&difficulty=easy
+    const queryObj = { ...this.queryString };
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+
+    excludedFields.forEach(el => delete queryObj[el]);
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+    this.query = this.query.find(JSON.parse(queryStr));
+
+    // this, is the object itself that makes it possible to chain one method after another
+    return this;
+  }
+
+  sort() {
+    // ?sort=price,-ratingsAverage
+    if (this.queryString.sort) {
+      const sortBy = this.queryString.sort.split(',').join(' ');
+      this.query = this.query.sort(sortBy);
+    } else {
+      this.query = this.query.sort('-createdAt');
+    }
+
+    // this, is the object itself that makes it possible to chain one method after another
+    return this;
+  }
+
+  limitFields() {
+    // ?fields=name,difficulty,price,images
+    if (this.queryString.fields) {
+      const fields = this.queryString.fields.split(',').join(' ');
+      this.query = this.query.select(fields);
+    } else {
+      this.query = this.query.select('-__v');
+    }
+
+    // this, is the object itself that makes it possible to chain one method after another
+    return this;
+  }
+
+  paginate() {
+    // ?page=2&limit=3
+    const page = this.queryString.page * 1 || 1;
+    const limit = this.queryString.limit * 1 || 100;
+    const skip = (page - 1) * limit;
+    this.query = this.query.skip(skip).limit(limit);
+
+    // this, is the object itself that makes it possible to chain one method after another
+    return this;
+  }
+}
 
 // request handler functions
 exports.getAllTours = async (req, res) => {
@@ -99,108 +157,6 @@ exports.deleteTour = async (req, res) => {
     res.status(204).json({
       status: 'Success',
       data: null,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'Fail',
-      message: err.message,
-    });
-  }
-};
-
-exports.getTourStats = async (req, res) => {
-  try {
-    const stats = await Tour.aggregate([
-      {
-        $match: { ratingsAverage: { $gte: 4.5 } },
-      },
-      {
-        $group: {
-          // group by _id
-          // _id: '$ratingsAverage',
-          // _id: '$difficulty',
-          _id: { $toUpper: '$difficulty' },
-          numTours: { $sum: 1 },
-          numRatings: { $sum: '$ratingsQuantity' },
-          avgRating: { $avg: '$ratingsAverage' },
-          avgPrice: { $avg: '$price' },
-          minPrice: { $min: '$price' },
-          maxPrice: { $max: '$price' },
-        },
-      },
-
-      {
-        $sort: {
-          // field to sort by (from the group above)
-          // $sort key ordering must be 1 (for ascending) or -1 (for descending)
-          avgPrice: -1,
-        },
-      },
-      // // we can also repeat stages:
-      // {
-      //   // select by id all doc that are not easy
-      //   $match: { _id: { $ne: 'EASY' } },
-      // },
-    ]);
-
-    res.status(200).json({
-      status: 'Success',
-      data: {
-        stats,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: 'Fail',
-      message: err.message,
-    });
-  }
-};
-
-exports.getMonthlyPlan = async (req, res) => {
-  try {
-    const year = req.params.year * 1;
-
-    const plan = await Tour.aggregate([
-      {
-        $unwind: '$startDates',
-      },
-      {
-        $match: {
-          startDates: {
-            $gte: new Date(`${year}-01-01`),
-            $lte: new Date(`${year}-12-31`),
-          },
-        },
-      },
-      {
-        $group: {
-          _id: { $month: '$startDates' },
-          numTourStarts: { $sum: 1 },
-          tours: { $push: '$name' },
-        },
-      },
-      {
-        $addFields: { month: '$_id' },
-      },
-      {
-        $project: {
-          _id: 0,
-        },
-      },
-      {
-        $sort: { numTourStarts: -1 },
-      },
-      {
-        $limit: 15,
-      },
-    ]);
-
-    res.status(200).json({
-      status: 'Success',
-      data: {
-        plan,
-      },
     });
   } catch (err) {
     res.status(404).json({
