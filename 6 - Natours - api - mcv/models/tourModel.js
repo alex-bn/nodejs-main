@@ -28,7 +28,7 @@ const tourSchema = new mongoose.Schema(
       required: [true, 'A tour must have a difficulty'],
       enum: {
         values: ['easy', 'medium', 'difficult'],
-        message: 'Difficulty is either: easy, medium, difficult.',
+        message: 'Difficulty is either: easy, medium, difficult',
       },
     },
     ratingsAverage: {
@@ -79,7 +79,7 @@ const tourSchema = new mongoose.Schema(
     startDates: [Date],
     secretTour: {
       type: Boolean,
-      dafault: false,
+      default: false,
     },
   },
   // virtual properties
