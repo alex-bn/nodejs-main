@@ -19,6 +19,14 @@ const handleValidationErrorDB = (err) => {
   return new AppError(message, 400);
 };
 
+// eslint-disable-next-line arrow-body-style
+const handleJWTError = () => {
+  return new AppError('Invalid token. Please log in again!', 401);
+};
+
+const handleJWTExpiredError = () =>
+  new AppError('Your token has expired! Please log in again.', 401);
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -60,9 +68,13 @@ module.exports = (err, req, res, next) => {
     // eslint-disable-next-line node/no-unsupported-features/es-syntax
     let error = { ...err };
 
-    if (err.name === 'CastError') error = handleCastErrorDB(error);
-    if (err.code === 11000) error = handleDuplicateFieldsDB(error);
-    if (err.name === 'ValidationError') error = handleValidationErrorDB(error);
+    if (error.name === 'CastError') error = handleCastErrorDB(error);
+    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+    if (error.name === 'ValidationError')
+      error = handleValidationErrorDB(error);
+    // eslint-disable-next-line no-unused-vars
+    if (error.name === 'JsonWebTokenError') error = handleJWTError();
+    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
 
     sendErrorProd(error, res);
   }

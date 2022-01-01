@@ -1,8 +1,14 @@
 const express = require('express');
 const userController = require('../controllers/userController');
+const authController = require('../controllers/authController');
 
 const router = express.Router();
 
+// user resource: authentication / authorization
+router.post('/signup', authController.signup);
+router.post('/login', authController.login);
+
+// REST philosophy/format
 router
   .route('/')
   .get(userController.getAllUsers)
