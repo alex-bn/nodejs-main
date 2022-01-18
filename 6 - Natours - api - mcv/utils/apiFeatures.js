@@ -23,6 +23,7 @@ class APIFeatures {
   sort() {
     // ?sort=price,-ratingsAverage
     if (this.queryString.sort) {
+      console.log(this.queryString.sort); // when using {{URL}}api/v1/tours?sort=duration&sort=price - > can become a problem
       const sortBy = this.queryString.sort.split(',').join(' ');
       this.query = this.query.sort(sortBy);
     } else {

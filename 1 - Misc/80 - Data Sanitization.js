@@ -2,10 +2,11 @@ const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
-// eslint-disable-next-line node/no-extraneous-require
-const hpp = require('hpp');
+https://www.npmjs.com/package/express-mongo-sanitize
+https://www.npmjs.com/package/xss-clean
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -38,24 +39,31 @@ app.use('/api', limiter);
 app.use(express.json({ limit: '10kb' }));
 
 // Data sanitization against NoSQL query injection
-app.use(mongoSanitize());
+/*
+Protects against the following type of attack:
+
+POST -> {{URL}}api/v1/users/login
+{
+    "email" : {"$gt": ""},
+    "password": "pass1234" => the attack assumes a common passwd phrase that is used in the database
+}
+
+,which will login the user and return a token.
+ */
+app.use(mongoSanitize()); // problem fixed!
 
 // Data sanitization against cross-sites scripting attacks
-app.use(xss());
-
-// Prevent parameter pollution
-app.use(
-  hpp({
-    whitelist: [
-      'duration',
-      'ratingsQuantity',
-      'ratingsAverage',
-      'maxGroupSize',
-      'difficulty',
-      'prices',
-    ],
-  })
-);
+app.use(xss()); // will clean any user input from malicious html code (with javascript attached to it)
+/*
+Example:
+POST -> {{URL}}api/v1/users/signup
+{
+    "email": "tester1@alex.com",
+    "password": "pass1234",
+    "passwordConfirm": "pass1234",
+    "name": "<div id='bad-code'>name</div>" <- this bad code will automatically be converted into an unusable entity
+}
+*/
 
 // Serving static files
 app.use(express.static(`${__dirname}/public`));
@@ -66,17 +74,3 @@ app.use((req, res, next) => {
   // console.log(req.headers);
   next();
 });
-
-// Mount routers
-app.use('/api/v1/tours', tourRouter);
-app.use('/api/v1/users', userRouter);
-
-// Handling unhandled routes
-app.all('*', (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
-});
-
-// GLOBAL ERROR HANDLING MIDDLEWARE
-app.use(globalErrorHandler);
-
-module.exports = app;
