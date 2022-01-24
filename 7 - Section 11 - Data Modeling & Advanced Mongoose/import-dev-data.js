@@ -25,7 +25,7 @@ mongoose
 
 // READ JSON FILE AND SAVE IT INTO A VARIABLE
 const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`, 'utf8')
+  fs.readFileSync(`${__dirname}/dev-data/data/tours.json`, 'utf8')
 );
 
 // IMPORT DATA INTO DB
