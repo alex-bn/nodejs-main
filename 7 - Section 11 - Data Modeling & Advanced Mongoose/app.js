@@ -7,6 +7,10 @@ const xss = require('xss-clean');
 // eslint-disable-next-line node/no-extraneous-require
 const hpp = require('hpp');
 
+const dotenv = require('dotenv');
+
+dotenv.config({ path: './config.env' });
+
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
@@ -36,7 +40,7 @@ app.use('/api', limiter);
 
 // Body parser, reading data from the body into req.body
 // Limit the amount of data that comes into the body
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: process.env.LIMIT_SIZE }));
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
