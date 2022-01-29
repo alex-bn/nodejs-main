@@ -11,20 +11,10 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-exports.getAllUsers = factory.getAll(User);
-
-// exports.getAllUsers = catchAsync(async (req, res, next) => {
-//   const users = await User.find();
-
-//   res.status(200).json({
-//     requestedAt: req.requestTime,
-//     status: 'Success',
-//     results: users.length,
-//     data: {
-//       users,
-//     },
-//   });
-// });
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) Create error if user POSTs password data
@@ -37,7 +27,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     );
   }
 
-  // Filtered out unwanted filed names that are not allowed to be updated
+  // 2) Filtered out unwanted filed names that are not allowed to be updated
   const filteredBody = filterObj(req.body, 'name', 'email');
 
   // 3) Update user document
@@ -58,12 +48,10 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user.id, { active: false });
 
   res.status(204).json({
-    status: 'success',
+    status: 'Success',
     data: null,
   });
 });
-
-exports.getUser = factory.getOne(User);
 
 exports.createUser = (req, res) => {
   res.status(500).json({
@@ -72,6 +60,8 @@ exports.createUser = (req, res) => {
   });
 };
 
+exports.getUser = factory.getOne(User);
+exports.getAllUsers = factory.getAll(User);
 // do NOT update passwords with this
 exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);
