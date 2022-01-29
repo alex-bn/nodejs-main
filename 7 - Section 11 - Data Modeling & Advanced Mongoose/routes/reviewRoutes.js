@@ -16,6 +16,8 @@ router
     reviewController.createReview
   );
 
+router.route('/:id').delete(reviewController.deleteReview);
+
 // test route
 // router.route('/:id').get(reviewController.getReview, authController.protect);
 
