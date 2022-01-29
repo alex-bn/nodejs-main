@@ -1,7 +1,6 @@
 /* eslint-disable node/no-unsupported-features/es-syntax */
 const Tour = require('../models/tourModel');
-const APIFeatures = require('../utils/apiFeatures');
-const AppError = require('../utils/appError');
+// const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 
@@ -13,39 +12,43 @@ exports.aliasTopTours = (req, res, next) => {
   next();
 };
 
+exports.getAllTours = factory.getAll(Tour);
+
 // request handler functions
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const tours = await features.query;
+// exports.getAllTours = catchAsync(async (req, res, next) => {
+//   const features = new APIFeatures(Tour.find(), req.query)
+//     .filter()
+//     .sort()
+//     .limitFields()
+//     .paginate();
+//   const tours = await features.query;
 
-  res.status(200).json({
-    requestedAt: req.requestTime,
-    status: 'Success',
-    results: tours.length,
-    data: {
-      tours,
-    },
-  });
-});
+//   res.status(200).json({
+//     requestedAt: req.requestTime,
+//     status: 'Success',
+//     results: tours.length,
+//     data: {
+//       tours,
+//     },
+//   });
+// });
 
-exports.getTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id).populate('reviews');
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 
-  if (!tour) {
-    return next(new AppError('No tour found with the given Id', 404));
-  }
+// exports.getTour = catchAsync(async (req, res, next) => {
+//   const tour = await Tour.findById(req.params.id).populate('reviews');
 
-  res.status(200).json({
-    status: 'Success',
-    data: {
-      tour,
-    },
-  });
-});
+//   if (!tour) {
+//     return next(new AppError('No tour found with the given Id', 404));
+//   }
+
+//   res.status(200).json({
+//     status: 'Success',
+//     data: {
+//       tour,
+//     },
+//   });
+// });
 
 exports.createTour = factory.createOne(Tour);
 
