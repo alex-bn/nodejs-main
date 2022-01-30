@@ -1,8 +1,6 @@
-// Parent Referencing
-// Challenge: review / rating / createdAt / ref to tour / ref to user
-
 const mongoose = require('mongoose');
-// const Tour = require('./tourModel');
+// const { findByIdAndUpdate, findByIdAndDelete } = require('./tourModel');
+const Tour = require('./tourModel');
 // const User = require('./userModel');
 
 const reviewSchema = new mongoose.Schema(
@@ -54,6 +52,55 @@ reviewSchema.pre(/^find/, function (next) {
     select: 'name photo',
   });
   next();
+});
+
+reviewSchema.statics.calcAverageRatings = async function (tourId) {
+  console.log(tourId);
+  const stats = await this.aggregate([
+    // the this keyword points to the schema model
+    {
+      $match: { tour: tourId },
+    },
+    {
+      $group: {
+        _id: '$tour',
+        nRating: { $sum: 1 },
+        avgRating: { $avg: '$rating' },
+      },
+    },
+  ]);
+  // console.log(stats);
+
+  if (stats.length > 0) {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: stats[0].nRating,
+      ratingsAverage: stats[0].avgRating,
+    });
+  } else {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: 0,
+      ratingsAverage: 4.5,
+    });
+  }
+};
+
+reviewSchema.post('save', function () {
+  // this points to current review
+
+  this.constructor.calcAverageRatings(this.tour);
+});
+
+// findByIdAndUpdate
+// findByIdAndDelete
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+  this.r = await this.clone().findOne(); // using this trick to pass the data from the pre middleware to the post middleware
+  // console.log(this.r);
+  next();
+});
+
+reviewSchema.post(/^findOneAnd/, async function () {
+  // await this.clone().findOne(); does not work here, query has already been executed
+  await this.r.constructor.calcAverageRatings(this.r.tour);
 });
 
 const Review = mongoose.model('Review', reviewSchema);
