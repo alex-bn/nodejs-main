@@ -2,6 +2,8 @@ const fs = require('fs');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Tour = require('./models/tourModel');
+const Review = require('./models/reviewModel');
+const User = require('./models/userModel');
 
 dotenv.config({ path: './config.env' });
 
@@ -27,12 +29,20 @@ mongoose
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours.json`, 'utf8')
 );
+const users = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/users.json`, 'utf8')
+);
+const reviews = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/reviews.json`, 'utf8')
+);
 
 // IMPORT DATA INTO DB
 const importData = async () => {
   try {
     await Tour.create(tours);
-    console.log('Data succesfully loaded!');
+    await User.create(users, { validateBeforeSave: false });
+    await Review.create(reviews);
+    console.log('Data successfully loaded!');
   } catch (error) {
     console.log(error);
   }
@@ -43,7 +53,9 @@ const importData = async () => {
 const deleteData = async () => {
   try {
     await Tour.deleteMany();
-    console.log('Data succesfully deleted!');
+    await User.deleteMany();
+    await Review.deleteMany();
+    console.log('Data successfully deleted!');
   } catch (error) {
     console.log(error);
   }
@@ -58,3 +70,6 @@ if (process.argv[2] === '--import') {
 } else if (process.argv[2] === '--delete') {
   deleteData();
 }
+
+// node .\import-dev-data.js --import
+// node .\import-dev-data.js --delete
