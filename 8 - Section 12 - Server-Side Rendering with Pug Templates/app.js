@@ -7,6 +7,8 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 // eslint-disable-next-line node/no-extraneous-require
 const hpp = require('hpp');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 const dotenv = require('dotenv');
 
@@ -20,6 +22,11 @@ const reviewRouter = require('./routes/reviewRoutes');
 const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
+
+const corsOptions = {
+  origin: '*',
+};
+app.use(cors(corsOptions));
 
 // define view engine
 app.set('view engine', 'pug');
@@ -51,6 +58,9 @@ app.use('/api', limiter);
 // Limit the amount of data that comes into the body
 app.use(express.json({ limit: process.env.LIMIT_SIZE }));
 
+//
+app.use(cookieParser());
+
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
 
@@ -75,6 +85,7 @@ app.use(
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   // console.log(req.headers);
+  console.log(req.cookies);
   next();
 });
 
