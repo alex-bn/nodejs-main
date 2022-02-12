@@ -5,7 +5,7 @@ import { login, logout } from './login';
 
 // DOM ELEMENTS
 const mapBox = document.getElementById('map');
-const loginForm = document.querySelector('.form');
+const loginForm = document.querySelector('.form--login');
 const logOutBtn = document.querySelector('.nav__el--logout');
 
 // DELEGATION
@@ -13,6 +13,7 @@ if (mapBox) {
   const locations = JSON.parse(mapBox.dataset.locations);
   displayMap(locations);
 }
+
 if (loginForm) {
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
