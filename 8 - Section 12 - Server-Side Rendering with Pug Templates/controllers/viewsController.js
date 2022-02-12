@@ -24,8 +24,19 @@ exports.getTour = catchAsync(async (req, res, next) => {
 
   // 3) render template using data from step 1)
 
-  res.status(200).render('tour', {
-    title: 'The Forest Hiker Tour',
-    tour: tour,
-  });
+  // CSP directives
+
+  res
+    .header('Access-Control-Allow-Origin: *')
+    .status(200)
+    .render('tour', {
+      title: `${tour.name} Tour`,
+      tour: tour,
+    });
 });
+
+exports.getLoginForm = (req, res) => {
+  res.status(200).render('login', {
+    title: `Log into your account`,
+  });
+};
