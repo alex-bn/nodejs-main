@@ -1,13 +1,13 @@
 .gitignore
-2 - Intro do Node.js and NPM/node_modules
-4 - Asynchronous JS/node_modules
-5 - Mongoose & Express/node_modules
+2 - Intro do Node.js and NPM/node_modules/
+4 - Asynchronous JS/node_modules/
+5 - Mongoose & Express/node_modules/
 5 - Mongoose & Express/config.env
-6 - Natours - api - mcv/node_modules
+6 - Natours - api - mcv/node_modules/
 6 - Natours - api - mcv/config.env
-7 - Section 11 - Data Modeling & Advanced Mongoose/node_modules
+7 - Section 11 - Data Modeling & Advanced Mongoose/node_modules/
 7 - Section 11 - Data Modeling & Advanced Mongoose/config.env
-8 - Section 12 - Server-Side Rendering with Pug Templates/node_modules
+8 - Section 12 - Server-Side Rendering with Pug Templates/node_modules/
 8 - Section 12 - Server-Side Rendering with Pug Templates/config.env
-8 - Section 12 - Server-Side Rendering with Pug Templates/.parcel-cache
-8 - Section 12 - Server-Side Rendering with Pug Templates/public/js/bundled
+8 - Section 12 - Server-Side Rendering with Pug Templates/.parcel-cache/
+8 - Section 12 - Server-Side Rendering with Pug Templates/public/js/bundled/

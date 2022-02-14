@@ -71,7 +71,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
 exports.logout = (req, res) => {
   res.cookie('jwt', 'null', {
-    expires: new Date(Date.now() - 10 * 1000),
+    expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
   });
 
@@ -124,28 +124,28 @@ exports.protect = catchAsync(async (req, res, next) => {
 // Only for render pages, no errors!
 exports.isLoggedIn = async (req, res, next) => {
   if (req.cookies.jwt) {
-    // 1) Verify token
-    const decoded = await promisify(jwt.verify)(
-      req.cookies.jwt,
-      process.env.JWT_SECRET
-    );
-    // 2) Check if user still exists
-    const currentUser = await User.findById(decoded.id);
-    if (!currentUser) {
-      return next();
-    }
-    // 3) Check if used changed password after the JWT(token) was issued
-    if (currentUser.changePasswordAfter(decoded.iat)) {
-      return next();
-    }
-    // 4) logout
-    if (req.cookies.jwt === 'null') {
-      return next();
-    }
+    try {
+      // 1) Verify token
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+      // 2) Check if user still exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next();
+      }
+      // 3) Check if used changed password after the JWT(token) was issued
+      if (currentUser.changePasswordAfter(decoded.iat)) {
+        return next();
+      }
 
-    // THERE IS A LOGGED IN USER
-    res.locals.user = currentUser;
-    return next();
+      // THERE IS A LOGGED IN USER
+      res.locals.user = currentUser;
+      return next();
+    } catch (err) {
+      return next();
+    }
   }
   next();
 };
