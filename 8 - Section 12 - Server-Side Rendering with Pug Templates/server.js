@@ -22,13 +22,21 @@ const app = require('./app');
 // });
 
 // CONNECT TO localhost: 127.0.0.1:27017
-mongoose
-  .connect(process.env.DATABASE_LOCAL)
-  .then((connection) =>
-    console.log(
-      `Connection to your local mongodb(${connection.connections[0].host}) is successful.`
+const retryConnect = () => {
+  mongoose
+    .connect(process.env.DATABASE_LOCAL)
+    .then((connection) =>
+      console.log(
+        `Connection to your local mongodb(${connection.connections[0].host}) is successful.`
+      )
     )
-  );
+    .catch((error) => {
+      console.log(error);
+      setTimeout(retryConnect, 5000);
+    });
+};
+// can I do better than this method?
+retryConnect();
 
 // console.log(process.env);
 const port = process.env.PORT || 3000;
